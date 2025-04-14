@@ -43,32 +43,11 @@ namespace TimelineSpecificityMod
         }
         public static void HighlightFromEnemy(this EnemyInFieldLayout self, bool click)
         {
-            if (CombatManager.Instance._stats.timeline.IsConfused) return;
-            for (int i = 0; i < CombatManager.Instance._stats.combatUI._TimelineHandler.TimelineSlotInfo.Count; i++)
-            {
-                TimelineInfo timeline = CombatManager.Instance._stats.combatUI._TimelineHandler.TimelineSlotInfo[i];
-                if (timeline.enemyID == self.EnemyID)
-                {
-                    foreach (TimelineSlotGroup slotgroup in CombatManager.Instance._stats.combatUI._timeline._slotsInUse)
-                    {
-                        if (slotgroup.slot.TimelineSlotID == i) slotgroup.slot.IconSpecify(click);
-                    }
-                }
-            }
+            HighlightFromID(self.EnemyID, click);
         }
         public static void DehighlightFromEnemy(this EnemyInFieldLayout self)
         {
-            for (int i = 0; i < CombatManager.Instance._stats.combatUI._TimelineHandler.TimelineSlotInfo.Count; i++)
-            {
-                TimelineInfo timeline = CombatManager.Instance._stats.combatUI._TimelineHandler.TimelineSlotInfo[i];
-                if (timeline.enemyID == self.EnemyID)
-                {
-                    foreach (TimelineSlotGroup slotgroup in CombatManager.Instance._stats.combatUI._timeline._slotsInUse)
-                    {
-                        if (slotgroup.slot.TimelineSlotID == i) slotgroup.slot.IconDespecify();
-                    }
-                }
-            }
+            DehighlightFromID(self.EnemyID);
         }
         public static void HighlightFromTimeline(this TimelineSlotLayout self, bool click, out int ID)
         {
