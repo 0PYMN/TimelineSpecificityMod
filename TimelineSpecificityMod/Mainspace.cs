@@ -21,7 +21,7 @@ namespace TimelineSpecificityMod
             new Hook(typeof(EnemyInFieldLayout).GetMethod(nameof(EnemyInFieldLayout.OnPointerExit), ~BindingFlags.Default), typeof(Hooks).GetMethod(nameof(Hooks.EnemyInFieldLayout_OnPointerExit), ~BindingFlags.Default));
             new Hook(typeof(EnemyInFieldLayout).GetMethod(nameof(EnemyInFieldLayout.OnPointerClick), ~BindingFlags.Default), typeof(Hooks).GetMethod(nameof(Hooks.EnemyInFieldLayout_OnPointerClick), ~BindingFlags.Default));
 
-            new Hook(typeof(TimelineSlotLayout).GetMethod(nameof(TimelineSlotLayout.OnPointerClick), ~BindingFlags.Default), typeof(Hooks).GetMethod(nameof(Hooks.TimelineSlotLayout_OnPointerEnter), ~BindingFlags.Default));
+            new Hook(typeof(TimelineSlotLayout).GetMethod(nameof(TimelineSlotLayout.OnPointerEnter), ~BindingFlags.Default), typeof(Hooks).GetMethod(nameof(Hooks.TimelineSlotLayout_OnPointerEnter), ~BindingFlags.Default));
             new Hook(typeof(TimelineSlotLayout).GetMethod(nameof(TimelineSlotLayout.OnPointerExit), ~BindingFlags.Default), typeof(Hooks).GetMethod(nameof(Hooks.TimelineSlotLayout_OnPointerExit), ~BindingFlags.Default));
             new Hook(typeof(TimelineSlotLayout).GetMethod(nameof(TimelineSlotLayout.OnPointerClick), ~BindingFlags.Default), typeof(Hooks).GetMethod(nameof(Hooks.TimelineSlotLayout_OnPointerClick), ~BindingFlags.Default));
 

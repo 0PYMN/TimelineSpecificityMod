@@ -13,32 +13,56 @@ namespace TimelineSpecificityMod
     {
         public static int StoredID = -1;
         public static int HoverID = -1;
+        public static Vector2 Default;
+        public static bool SetDefault;
+        public static void FixShaderStencil(this Material self)
+        {
+            self.SetFloat("_StencilComp", 8);
+            self.SetFloat("_Stencil", 0);
+            self.SetFloat("_StencilOp", 0);
+            self.SetFloat("_StencilWriteMask", 255);
+            self.SetFloat("_StencilReadMask", 255);
+            self.SetFloat("_ColorMask", 15);
+        }
         public static void IconSpecify(this TimelineSlotLayout self, bool click)
         {
+            /*if (!SetDefault)
+            {
+                Default = self._enemyIcon.rectTransform.sizeDelta;
+                SetDefault = true;
+            }
+            if (click)
+                self._enemyIcon.rectTransform.sizeDelta = new Vector2(Default.x * 1.5f, Default.y * 1.5f);
+            else
+                self._enemyIcon.rectTransform.sizeDelta = new Vector2(Default.x * 1.25f, Default.y * 1.25f);
+            return;*/
             if (self._enemyIcon != null && !self._enemyIcon.Equals(null))
             {
-                if (self._enemyIcon.material != Materials._enemyMaterialInstance || !self._enemyIcon.material.Equals(Materials._enemyMaterialInstance))
-                {
-                    Debug.Log("timelineselectmod: setting timeline sprite material");
-                    self._enemyIcon.material = Materials._enemyMaterialInstance;
-                }
-                Debug.Log("timelineselectmod: setting specify colors");
-                self._enemyIcon.material.SetColor("_OutlineColor", click ? LoadedDBsHandler.CombatData.EnemyTurnColor : LoadedDBsHandler.CombatData.EnemyHoverColor);
-                self._enemyIcon.material.SetFloat("_OutlineAlpha", 1);
+                self._enemyIcon.material = new Material(LoadedDBsHandler.CombatData.EnemyMaterialTemplate);
+                self._enemyIcon.material.FixShaderStencil();
+                self._enemyIcon.materialForRendering.SetColor("_OutlineColor", click ? LoadedDBsHandler.CombatData.EnemyTurnColor : LoadedDBsHandler.CombatData.EnemyHoverColor);
+                self._enemyIcon.materialForRendering.SetFloat("_OutlineAlpha", 1);
             }
         }
         public static void IconDespecify(this TimelineSlotLayout self)
         {
+            /*if (!SetDefault)
+            {
+                Debug.LogWarning("Default Sizse Not Set!");
+                return;
+            }
+            self._enemyIcon.rectTransform.sizeDelta = Default;
+            return;*/
             if (self._enemyIcon != null && !self._enemyIcon.Equals(null))
             {
-                if (self._enemyIcon.material != Materials._enemyMaterialInstance || !self._enemyIcon.material.Equals(Materials._enemyMaterialInstance))
+                /*if (self._enemyIcon.material != LoadedDBsHandler.CombatData.EnemyMaterialTemplate || !self._enemyIcon.material.Equals(LoadedDBsHandler.CombatData.EnemyMaterialTemplate))
                 {
-                    Debug.Log("timelineselectmod: setting timeline sprite material");
-                    self._enemyIcon.material = Materials._enemyMaterialInstance;
+                    //Debug.Log("timelineselectmod: setting timeline sprite material");
+                    self._enemyIcon.material = LoadedDBsHandler.CombatData.EnemyMaterialTemplate;
                 }
-                Debug.Log("timelineselectmod: setting despesify colors");
-                self._enemyIcon.material.SetColor("_OutlineColor", LoadedDBsHandler.CombatData.EnemyBasicColor);
-                self._enemyIcon.material.SetFloat("_OutlineAlpha", 0);
+                //Debug.Log("timelineselectmod: setting despesify colors");*/
+                self._enemyIcon.materialForRendering.SetColor("_OutlineColor", LoadedDBsHandler.CombatData.EnemyBasicColor);
+                self._enemyIcon.materialForRendering.SetFloat("_OutlineAlpha", 0);
             }
         }
         public static void HighlightFromEnemy(this EnemyInFieldLayout self, bool click)
@@ -49,19 +73,19 @@ namespace TimelineSpecificityMod
         {
             DehighlightFromID(self.EnemyID);
         }
-        public static void HighlightFromTimeline(this TimelineSlotLayout self, bool click, out int ID)
+        public static int GetIDFromtTimeline(this TimelineSlotLayout self)
         {
-            ID = -1;
             List<TimelineInfo> timelineSlotInfo = CombatManager.Instance._stats.combatUI._TimelineHandler.TimelineSlotInfo;
-            if (self.TimelineSlotID < 0 || self.TimelineSlotID >= timelineSlotInfo.Count) return;
-            HighlightFromID(timelineSlotInfo[self.TimelineSlotID].enemyID, click);
-            ID = timelineSlotInfo[self.TimelineSlotID].enemyID;
+            if (self.TimelineSlotID < 0 || self.TimelineSlotID >= timelineSlotInfo.Count) return -1;
+            return timelineSlotInfo[self.TimelineSlotID].enemyID;
+        }
+        public static void HighlightFromTimeline(this TimelineSlotLayout self, bool click)
+        {
+            HighlightFromID(self.GetIDFromtTimeline(), click);
         }
         public static void DehighlightFromTimeline(this TimelineSlotLayout self)
         {
-            List<TimelineInfo> timelineSlotInfo = CombatManager.Instance._stats.combatUI._TimelineHandler.TimelineSlotInfo;
-            if (self.TimelineSlotID < 0 || self.TimelineSlotID >= timelineSlotInfo.Count) return;
-            DehighlightFromID(timelineSlotInfo[self.TimelineSlotID].enemyID);
+            DehighlightFromID(self.GetIDFromtTimeline());
         }
         public static void HighlightFromID(int self, bool click)
         {
@@ -71,6 +95,7 @@ namespace TimelineSpecificityMod
                 TimelineInfo timeline = CombatManager.Instance._stats.combatUI._TimelineHandler.TimelineSlotInfo[i];
                 if (timeline.enemyID == self)
                 {
+                    if (timeline.isSecret) continue;
                     foreach (TimelineSlotGroup slotgroup in CombatManager.Instance._stats.combatUI._timeline._slotsInUse)
                     {
                         if (slotgroup.slot.TimelineSlotID == i) slotgroup.slot.IconSpecify(click);
@@ -142,21 +167,21 @@ namespace TimelineSpecificityMod
         public static void TimelineSlotLayout_OnPointerEnter(Action<TimelineSlotLayout, PointerEventData> orig, TimelineSlotLayout self, PointerEventData eventData)
         {
             orig(self, eventData);
-            self.HighlightFromTimeline(false, out int ID);
-            HoverID = ID;
+            if (self.GetIDFromtTimeline() != StoredID) self.HighlightFromTimeline(false);
+            HoverID = self.GetIDFromtTimeline();
         }
         public static void TimelineSlotLayout_OnPointerExit(Action<TimelineSlotLayout, PointerEventData> orig, TimelineSlotLayout self, PointerEventData eventData)
         {
             orig(self, eventData);
-            self.DehighlightFromTimeline();
+            if (self.GetIDFromtTimeline() != StoredID) self.DehighlightFromTimeline();
             HoverID = -1;
         }
         public static void TimelineSlotLayout_OnPointerClick(Action<TimelineSlotLayout, PointerEventData> orig, TimelineSlotLayout self, PointerEventData eventData)
         {
             orig(self, eventData);
             DehighlightFromID(StoredID);
-            self.HighlightFromTimeline(true, out int ID);
-            StoredID = ID;
+            self.HighlightFromTimeline(true);
+            StoredID = self.GetIDFromtTimeline();
         }
 
         public static void CombatVisualizationController_TryHideEnemyIDInformation(Action<CombatVisualizationController, int> orig, CombatVisualizationController self, int id)
