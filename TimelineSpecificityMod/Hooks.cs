@@ -187,7 +187,11 @@ namespace TimelineSpecificityMod
         public static void CombatVisualizationController_TryHideEnemyIDInformation(Action<CombatVisualizationController, int> orig, CombatVisualizationController self, int id)
         {
             orig(self, id);
-            if (id != HoverID) DehighlightFromID(id);
+            if (id != HoverID)
+            {
+                DehighlightFromID(id);
+                if (id == StoredID) StoredID = -1;
+            }
         }
     }
 }
