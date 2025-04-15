@@ -15,6 +15,7 @@ namespace TimelineSpecificityMod
         public static int HoverID = -1;
         public static Vector2 Default;
         public static bool SetDefault;
+        public static Material OldMaterial;
         public static void FixShaderStencil(this Material self)
         {
             self.SetFloat("_StencilComp", 8);
@@ -38,6 +39,10 @@ namespace TimelineSpecificityMod
             return;*/
             if (self._enemyIcon != null && !self._enemyIcon.Equals(null))
             {
+                if (OldMaterial == null)
+                {
+                    OldMaterial = self._enemyIcon.material;
+                }
                 self._enemyIcon.material = new Material(LoadedDBsHandler.CombatData.EnemyMaterialTemplate);
                 self._enemyIcon.material.FixShaderStencil();
                 self._enemyIcon.materialForRendering.SetColor("_OutlineColor", click ? LoadedDBsHandler.CombatData.EnemyTurnColor : LoadedDBsHandler.CombatData.EnemyHoverColor);
@@ -63,6 +68,7 @@ namespace TimelineSpecificityMod
                 //Debug.Log("timelineselectmod: setting despesify colors");*/
                 self._enemyIcon.materialForRendering.SetColor("_OutlineColor", LoadedDBsHandler.CombatData.EnemyBasicColor);
                 self._enemyIcon.materialForRendering.SetFloat("_OutlineAlpha", 0);
+                if (OldMaterial != null) self._enemyIcon.material = new Material(OldMaterial);
             }
         }
         public static void HighlightFromEnemy(this EnemyInFieldLayout self, bool click)
